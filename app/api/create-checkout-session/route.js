@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Client, Environment } from "square";
 
 const client = new Client({
