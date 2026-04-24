@@ -5,7 +5,7 @@ export async function POST(req) {
     const locationId = process.env.SQUARE_LOCATION_ID;
     const token = process.env.SQUARE_ACCESS_TOKEN;
 
-    const res = await fetch("https://connect.squareupsandbox.com/v2/online-checkout/payment-links", {
+    const res = await fetch("https://connect.squareup.com/v2/online-checkout/payment-links", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
