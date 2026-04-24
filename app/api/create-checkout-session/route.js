@@ -1,28 +1,42 @@
 export const dynamic = "force-dynamic";
 
-import { Client, Environment } from "square";
-
-const client = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: Environment.Sandbox,
-});
-
 export async function POST(req) {
-  const { name } = await req.json();
+  try {
+    const locationId = process.env.SQUARE_LOCATION_ID;
+    const token = process.env.SQUARE_ACCESS_TOKEN;
 
-  const response = await client.checkoutApi.createPaymentLink({
-    idempotencyKey: crypto.randomUUID(),
-    quickPay: {
-      name: "Hydro Shine Deposit",
-      priceMoney: {
-        amount: 2000, // £20
-        currency: "GBP",
+    const res = await fetch("https://connect.squareupsandbox.com/v2/online-checkout/payment-links", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      locationId: process.env.SQUARE_LOCATION_ID,
-    },
-  });
+      body: JSON.stringify({
+        idempotency_key: crypto.randomUUID(),
+        quick_pay: {
+          name: "Hydro Shine Deposit",
+          price_money: {
+            amount: 2000,
+            currency: "GBP",
+          },
+          location_id: locationId,
+        },
+      }),
+    });
 
-  return Response.json({
-    url: response.result.paymentLink.url,
-  });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    return Response.json({
+      url: data.payment_link.url,
+    });
+  } catch (err) {
+    return Response.json(
+      { error: err.message || "Payment failed" },
+      { status: 500 }
+    );
+  }
 }
